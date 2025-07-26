@@ -1,0 +1,1 @@
+fastapi uvicorn langchain openai chromadb pypdf2 python-multipart
