@@ -10,7 +10,6 @@ import shutil, os, uvicorn
 app = FastAPI(title="AI KB MVP")
 persist_dir = "./chroma"
 
-# 统一使用 langchain-openai
 embeddings = OpenAIEmbeddings(
     openai_api_key=os.getenv("OPENAI_API_KEY"),
     openai_api_base=os.getenv("OPENAI_API_BASE", "https://www.chataiapi.com/v1")
