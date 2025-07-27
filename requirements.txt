@@ -1,7 +1,7 @@
 fastapi
 uvicorn
 langchain
+langchain-community
 openai
 chromadb
-pypdf2
-python-multipart
+pypdf
