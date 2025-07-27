@@ -20,4 +20,23 @@ embeddings = OpenAIEmbeddings(
 async def upload(file: UploadFile = File(...)):
     tmp = f"/tmp/{file.filename}"
     with open(tmp, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer
+        shutil.copyfileobj(file.file, buffer)
+    loader = PyPDFLoader(tmp)
+    docs = loader.load_and_split(
+        RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    )
+    Chroma.from_documents(docs, embeddings, persist_directory=persist_dir)
+    return {"status": "ok", "chunks": len(docs)}
+
+@app.post("/chat")
+async def chat(query: str = Form(...)):
+    store = Chroma(persist_directory=persist_dir, embedding_function=embeddings)
+    qa = RetrievalQA.from_chain_type(
+        llm=OpenAI(
+            openai_api_key=os.getenv("OPENAI_API_KEY"),
+            openai_api_base=os.getenv("OPENAI_API_BASE", "https://www.chataiapi.com/v1")
+        ),
+        retriever=store.as_retriever()
+    )
+    answer = qa.run(query)
+    return {"answer": answer}
