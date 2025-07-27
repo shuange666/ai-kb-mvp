@@ -25,4 +25,4 @@ async def upload(file: UploadFile = File(...)):
 async def chat(query: str = Form(...)):
     store = Chroma(persist_directory=persist_dir, embedding_function=embeddings)
     qa = OpenAI().create_qa_chain(llm=OpenAI(), retriever=store.as_retriever())
-    return {"answer": qa({"query": query})}
+    return {"answer": qa.run(query)}
