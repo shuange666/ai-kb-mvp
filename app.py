@@ -1,10 +1,9 @@
 from fastapi import FastAPI, File, UploadFile, Form
 from langchain_community.document_loaders import PyPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.vectorstores import Chroma
-from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.chains import RetrievalQA
-from langchain.llms import OpenAI
+from langchain_community.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.vectorstores import Chroma
+from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_community.llms import OpenAI
 import shutil, os, uvicorn
 
 app = FastAPI()
@@ -25,8 +24,5 @@ async def upload(file: UploadFile = File(...)):
 @app.post("/chat")
 async def chat(query: str = Form(...)):
     store = Chroma(persist_directory=persist_dir, embedding_function=embeddings)
-    qa = RetrievalQA.from_chain_type(
-        llm=OpenAI(openai_api_key=os.getenv("OPENAI_API_KEY")),
-        retriever=store.as_retriever()
-    )
-    return {"answer": qa.run(query)}
+    qa = OpenAI().create_qa_chain(llm=OpenAI(), retriever=store.as_retriever())
+    return {"answer": qa({"query": query})}
