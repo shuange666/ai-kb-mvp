@@ -1,16 +1,16 @@
 from fastapi import FastAPI, File, UploadFile, Form
-from fastapi.responses import JSONResponse
 from langchain.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import Chroma
-from langchain.embeddings import OpenAIEmbeddings
+from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.chains import RetrievalQA
 from langchain.llms import OpenAI
 import shutil, os, uvicorn
 
 app = FastAPI(title="AI KB MVP")
-
 persist_dir = "./chroma"
+
+# 统一使用 langchain-openai
 embeddings = OpenAIEmbeddings(
     openai_api_key=os.getenv("OPENAI_API_KEY"),
     openai_api_base=os.getenv("OPENAI_API_BASE", "https://www.chataiapi.com/v1")
@@ -21,8 +21,7 @@ async def upload(file: UploadFile = File(...)):
     tmp = f"/tmp/{file.filename}"
     with open(tmp, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
-    loader = PyPDFLoader(tmp)
-    docs = loader.load_and_split(
+    docs = PyPDFLoader(tmp).load_and_split(
         RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     )
     Chroma.from_documents(docs, embeddings, persist_directory=persist_dir)
@@ -38,5 +37,4 @@ async def chat(query: str = Form(...)):
         ),
         retriever=store.as_retriever()
     )
-    answer = qa.run(query)
-    return {"answer": answer}
+    return {"answer": qa.run(query)}
