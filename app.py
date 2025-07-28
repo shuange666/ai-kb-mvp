@@ -29,9 +29,9 @@ MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 
 # 初始化Embeddings
 embeddings = OpenAIEmbeddings(
-    model="text-embedding-3-small",
     openai_api_key=os.getenv("OPENAI_API_KEY"),
-    openai_api_base=os.getenv("OPENAI_API_BASE", "https://api.openai.com/v1")
+    openai_api_base=os.getenv("OPENAI_API_BASE"),  # 确保使用变量
+    model="text-embedding-3-small"
 )
 
 # 确保存储目录存在
