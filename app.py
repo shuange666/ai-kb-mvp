@@ -28,12 +28,16 @@ async def upload(file: UploadFile = File(...)):
 
 @app.post("/chat")
 async def chat(query: str = Form(...)):
-    store = Chroma(persist_directory=persist_dir, embedding_function=embeddings)
-    qa = RetrievalQA.from_chain_type(
-        llm=OpenAI(
-            openai_api_key=os.getenv("OPENAI_API_KEY"),
-            openai_api_base=os.getenv("OPENAI_API_BASE", "https://www.chataiapi.com/v1")
-        ),
-        retriever=store.as_retriever()
-    )
-    return {"answer": qa.run(query)}
+    try:
+        store = Chroma(persist_directory=persist_dir, embedding_function=embeddings)
+        qa = RetrievalQA.from_chain_type(
+            llm=OpenAI(
+                openai_api_key=os.getenv("OPENAI_API_KEY"),
+                openai_api_base=os.getenv("OPENAI_API_BASE", "https://www.chataiapi.com/v1")
+            ),
+            retriever=store.as_retriever()
+        )
+        answer = qa.run(query)
+    except Exception as e:
+        return {"answer": "请先上传文档后再提问。", "error": str(e)}
+    return {"answer": answer}
