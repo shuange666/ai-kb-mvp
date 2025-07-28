@@ -1,16 +1,25 @@
-FROM python:3.10
+FROM python:3.10-slim
 
 WORKDIR /app
 
-# 先升级 pip 避免旧版 pip 的依赖解析问题
+# 安装系统依赖
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gcc python3-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+# 先升级pip
 RUN pip install --upgrade pip
 
 COPY requirements.txt .
 
-# 使用 --no-cache-dir 和 --upgrade 确保干净安装
-RUN pip install --no-cache-dir --upgrade -r requirements.txt
+# 安装Python依赖
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# 修正命令拼写 (CHD -> CMD) 并添加正确的双短横线
+# 创建持久化存储目录
+RUN mkdir -p /app/chrom_db
+
+EXPOSE 10000
+
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "10000"]
