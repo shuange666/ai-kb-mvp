@@ -41,3 +41,6 @@ async def chat(query: str = Form(...)):
     except Exception as e:
         return {"answer": "请先上传文档后再提问。", "error": str(e)}
     return {"answer": answer}
+@app.get("/")
+async def root():
+    return {"message": "AI 知识库 MVP 已上线，请访问 /docs 查看接口文档。"}
